@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANTI_PANEL | Professional</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background: #010a12; color: white; overflow-x: hidden; }
+        .screen { display: none; min-height: 100vh; width: 100%; position: relative; }
+        .active { display: block !important; }
+        .auth-center { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .box { background: #061626; padding: 30px; border-radius: 15px; width: 90%; max-width: 360px; border: 1px solid #1a3047; text-align: center; }
+        h2 { color: #00d094; margin-bottom: 20px; font-size: 20px; }
+        input { width: 100%; padding: 14px; margin: 10px 0; background: #0b1e31; border: 1px solid #1a3047; color: white; border-radius: 8px; outline: none; }
+        .btn { width: 100%; padding: 15px; background: #00d094; color: #010a12; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .link { color: #00d094; font-size: 13px; cursor: pointer; margin-top: 15px; display: block; }
+        .header { background: #061626; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00d094; position: sticky; top: 0; z-index: 10; }
+        .bal-amt { font-size: 24px; font-weight: bold; color: #00d094; margin-top: 5px; }
+        .live-tag { color: #00d094; font-weight: bold; font-size: 14px; }
+        .container { padding: 20px; }
+        .trade-card { background: #061626; border: 1px solid #1a3047; border-radius: 12px; overflow: hidden; margin: 0 auto 20px auto; cursor: pointer; position: relative; max-width: 320px; }
+        .card-header { padding: 10px; color: #00d094; font-weight: bold; font-size: 14px; border-bottom: 1px solid #1a3047; text-align: center; }
+        .trade-card img { width: 100%; height: 180px; object-fit: cover; display: block; background: #0b1e31; }
+        .dash-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 5; text-align: center; }
+        .error-msg { color: #ff4d4d; font-weight: bold; font-size: 12px; margin-top: 10px; text-transform: uppercase; padding: 0 5px; }
+        .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .nav-btn { background: #0b1e31; padding: 15px; border-radius: 10px; border: 1px solid #1a3047; font-weight: bold; cursor: pointer; text-align: center; color: white; font-size: 14px; }
+        .amt-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .amt-btn { background: #0b1e31; border: 1px solid #1a3047; color: white; padding: 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        .tab-grid { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 12px; background: #0b1e31; border: 1px solid #1a3047; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .active-tab { border-color: #00d094; color: #00d094; background: #061626; }
+        .support-box { margin-top: 20px; text-align: center; padding: 15px; background: #0b1e31; border-radius: 12px; border: 1px dashed #00d094; }
+        .support-btn { display: inline-block; text-decoration: none; color: #010a12; background: #00d094; padding: 10px 20px; border-radius: 50px; font-weight: bold; font-size: 12px; margin-top: 8px; }
+        .spinner { border: 3px solid rgba(255, 255, 255, 0.1); border-top: 3px solid #00d094; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #qr-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .qr-white-box { background: white; padding: 20px; border-radius: 15px; text-align: center; width: 85%; max-width: 320px; }
+        .qr-white-box img { width: 100%; max-height: 250px; object-fit: contain; margin: 10px 0; display: block; }
+        #payment-loading { display: none; text-align: center; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="screen-auth" class="screen active">
+        <div class="auth-center">
+            <div id="reg-box" class="box">
+                <h2>QUOTEX REGISTER</h2>
+                <input type="text" id="reg-user" placeholder="Username">
+                <input type="password" id="reg-pass" placeholder="Password">
+                <input type="password" id="reg-repass" placeholder="Confirm Password">
+                <button class="btn" onclick="handleRegister()">REGISTER</button>
+                <span class="link" onclick="toggleAuth()">Already have an account? Login</span>
+            </div>
+            <div id="login-box" class="box hidden">
+                <h2>QUOTEX LOGIN</h2>
+                <input type="text" id="log-user" placeholder="Username">
+                <input type="password" id="log-pass" placeholder="Password">
+                <button class="btn" onclick="handleLogin()">LOGIN</button>
+                <span class="link" onclick="toggleAuth()">New user? Register</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-dash" class="screen">
+        <div class="header">
+            <div><p style="font-size:10px; color:#8491a5;">Total Balance</p><p class="bal-amt">₹ 151.00</p></div>
+            <div class="live-tag">● LIVE</div>
+        </div>
+        <div class="container">
+            <div class="trade-card" onclick="startDashLoading()">
+                <div class="card-header">QUOTEX TRADER</div>
+                <div id="dash-load-overlay" class="dash-overlay">
+                    <div class="spinner"></div>
+                    <p id="error-text" class="error-msg hidden">PLATFORM REQUIRED RECHARGE FIRST</p>
+                </div>
+                <img src="image.jpg" alt="Trade">
+            </div>
+            <div class="btn-row">
+                <div class="nav-btn" onclick="navTo('screen-dep')">RECHARGE</div>
+                <div class="nav-btn" onclick="navTo('screen-with')">WITHDRAWAL</div>
+            </div>
+            <div class="support-box">
+                <p style="font-size: 11px; color: #8491a5;">Face any problem?</p>
+                <h3 style="color: #00d094; font-size: 16px;">24/7 CUSTOMER SERVICE</h3>
+                <a href="https://t.me/CUSTOMER_SERVICE9998" target="_blank" class="support-btn">CHAT ON TELEGRAM</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-dep" class="screen">
+        <div class="header"><div onclick="navTo('screen-dash')" style="cursor:pointer">← Back</div><div style="color:#00d094;">RECHARGE</div></div>
+        <div class="container">
+            <div class="amt-grid">
+                <button class="amt-btn" onclick="setAmt(500)">500</button>
+                <button class="amt-btn" onclick="setAmt(1000)">1000</button>
+                <button class="amt-btn" onclick="setAmt(2000)">2000</button>
+                <button class="amt-btn" onclick="setAmt(5000)">5000</button>
+                <button class="amt-btn" onclick="setAmt(10000)">10000</button>
+                <button class="amt-btn" onclick="setAmt(20000)">20000</button>
+            </div>
+            <input type="number" id="dep-amt" placeholder="Enter Amount" style="width:100%; padding:15px; background:#0b1e31; border:1px solid #1a3047; color:white; border-radius:8px;">
+            <button class="btn" onclick="openQR()">Deposit Now</button>
+        </div>
+    </div>
+
+    <div id="qr-overlay">
+        <div id="qr-main-content" class="qr-white-box">
+            <h3 style="color:#333; margin-bottom:10px;">SCAN TO PAY</h3>
+            <img src="myqr.jpg" alt="QR">
+            <h2 id="show-amt" style="color:#010a12; margin-top:10px;">₹0</h2>
+        </div>
+        <div id="payment-loading">
+            <div class="spinner" style="margin: 0 auto;"></div>
+            <p style="color:#00d094; margin-top:15px; font-weight:bold;">Verifying Transaction...</p>
+        </div>
+        <button id="paid-btn" class="btn" style="width:300px; background:#fff; color:#010a12; margin-top:20px;" onclick="verifyPayment()">I HAVE PAID</button>
+    </div>
+
+    <div id="screen-with" class="screen">
+        <div class="header"><div onclick="navTo('screen-dash')" style="cursor:pointer">← Back</div><div style="color:#00d094;">WITHDRAWAL</div></div>
+        <div class="container">
+            <div class="tab-grid">
+                <button id="ut" class="tab-btn active-tab" onclick="tab('u')">UPI</button>
+                <button id="bt" class="tab-btn" onclick="tab('b')">Bank Card</button>
+            </div>
+            <div id="u-form">
+                <input type="text" placeholder="Enter UPI ID (e.g. name@upi)">
+            </div>
+            <div id="b-form" class="hidden">
+                <input type="text" placeholder="Account Holder Name">
+                <input type="number" placeholder="Account Number">
+                <input type="text" placeholder="IFSC Code">
+                <input type="text" placeholder="Bank Name">
+            </div>
+            <p style="font-size: 12px; color: #8491a5; margin-top: 15px;">Withdrawal Amount (Min: ₹600)</p>
+            <input type="number" id="with-amt" placeholder="Enter Amount" style="width:100%;">
+            <button class="btn" onclick="handleWithdraw()">CONFIRM WITHDRAWAL</button>
+        </div>
+    </div>
+
+    <script>
+        function navTo(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+        function toggleAuth() {
+            document.getElementById('reg-box').classList.toggle('hidden');
+            document.getElementById('login-box').classList.toggle('hidden');
+        }
+        function handleRegister() {
+            const u = document.getElementById('reg-user').value.trim();
+            const p = document.getElementById('reg-pass').value.trim();
+            const rp = document.getElementById('reg-repass').value.trim();
+            if(!u || !p) return alert("Fill all fields!");
+            if(p !== rp) return alert("Passwords do not match!");
+            localStorage.setItem('u', u); localStorage.setItem('p', p);
+            alert("Registration Successful! Please Login."); toggleAuth();
+        }
+        function handleLogin() {
+            const u = document.getElementById('log-user').value.trim();
+            const p = document.getElementById('log-pass').value.trim();
+            if(u === localStorage.getItem('u') && p === localStorage.getItem('p')) { navTo('screen-dash'); } 
+            else { alert("Invalid Username or Password!"); }
+        }
+        function startDashLoading() {
+            const overlay = document.getElementById('dash-load-overlay');
+            const error = document.getElementById('error-text');
+            overlay.style.display = 'flex';
+            setTimeout(() => {
+                error.classList.remove('hidden');
+                setTimeout(() => { overlay.style.display = 'none'; error.classList.add('hidden'); }, 3000);
+            }, 1000);
+        }
+        function setAmt(v) { document.getElementById('dep-amt').value = v; }
+        function openQR() {
+            let a = document.getElementById('dep-amt').value;
+            if(!a || a < 500) return alert("Minimum deposit is ₹500");
+            document.getElementById('show-amt').innerText = "₹" + a;
+            document.getElementById('qr-main-content').style.display = 'block';
+            document.getElementById('payment-loading').style.display = 'none';
+            document.getElementById('paid-btn').style.display = 'block';
+            document.getElementById('qr-overlay').style.display = 'flex';
+        }
+        function verifyPayment() {
+            document.getElementById('qr-main-content').style.display = 'none';
+            document.getElementById('paid-btn').style.display = 'none';
+            document.getElementById('payment-loading').style.display = 'block';
+            setTimeout(() => {
+                alert("Payment request received! It will be updated within 30 minutes.");
+                document.getElementById('qr-overlay').style.display = 'none';
+                navTo('screen-dep');
+            }, 3000);
+        }
+        function tab(t) {
+            if(t === 'u') {
+                document.getElementById('u-form').classList.remove('hidden');
+                document.getElementById('b-form').classList.add('hidden');
+                document.getElementById('ut').classList.add('active-tab');
+                document.getElementById('bt').classList.remove('active-tab');
+            } else {
+                document.getElementById('u-form').classList.add('hidden');
+                document.getElementById('b-form').classList.remove('hidden');
+                document.getElementById('bt').classList.add('active-tab');
+                document.getElementById('ut').classList.remove('active-tab');
+            }
+        }
+        function handleWithdraw() {
+            const amt = document.getElementById('with-amt').value;
+            if(!amt || amt < 600) return alert("Minimum withdrawal is ₹600");
+            alert("Insufficient Balance! Your current balance is ₹151.00");
+        }
+    </script>
+</body>
+</html>
